@@ -25,7 +25,7 @@
 import cv2 as _cv
 import time as _time
 import numpy as _np
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as _plt 
 from Logger.Logger import Logger as _Logger   
 
 
@@ -456,9 +456,9 @@ class ImgFeatures:
                 kp_ = kp
 
             img_kp = _cv.drawKeypoints(img, kp_, None, color=(0,255,0), flags=_cv.DrawMatchesFlags_DEFAULT)
-            plt.figure()
-            plt.imshow(img_kp, cmap='gray')
-            plt.show()
+            _plt.figure()
+            _plt.imshow(img_kp, cmap='gray')
+            _plt.show()
             
         
         self._logger.Log(self._keepLogFile, 'info', 'Detector has finished in time: {0} msec'.format(toc))
