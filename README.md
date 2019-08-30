@@ -38,7 +38,7 @@ or alternatively you can install them using `pip`.
 >
 > $ pip install opencv-python
 
-For the installation of the *cvToolbox* package please read the corresponding [README.md](https://github.com/ekarakasis/cvToolbox/blob/master/README.md)
+For the installation of the *Logger* package please read the corresponding [README.md](https://github.com/ekarakasis/Logger/blob/master/README.md)
 
 
 ### Installation
