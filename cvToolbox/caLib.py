@@ -22,23 +22,23 @@
 #  
 #  ==================================================================================
 
-import os
-import cv2
-import datetime
-import pickle
-import numpy as np 
-import scipy.io as sio
-from Logger.Logger import Logger
+import os as _os
+import cv2 as _cv
+import datetime as _datetime
+import pickle as _pickle
+import numpy as _np 
+import scipy.io as _sio
+from Logger.Logger import Logger as _Logger
 
 # ===== Utilities ===================================================================
 
-def MkDir(rootFolder):
-    if not os.path.exists(rootFolder):
-        os.mkdir(rootFolder)
+def _MkDir(rootFolder):
+    if not _os.path.exists(rootFolder):
+        _os.mkdir(rootFolder)
         
 # def DelFile(fileName):
-#     if os.path.exists(fileName):
-#         os.remove(fileName)
+#     if _os.path.exists(fileName):
+#         _os.remove(fileName)
 
 # ===== Calibration Logger ==========================================================
 
@@ -46,34 +46,34 @@ def MkDir(rootFolder):
 # Kill all previous loggers and delete the corresponding log files  
 # BE CAREFUL!!! this lines may kill and delete other useful loggers and 
 # log files in your application.
-# Logger.KillAllLoggers()
-# Logger.DeleteAllLogFiles()
+# _Logger.KillAllLoggers()
+# _Logger.DeleteAllLogFiles()
 # ------------
 
-class CalibLogger: 
-    TNLM = Logger('calibLogger.TNLM', 'calibrationLog', 'Logs', 'time-name-level-message')
-    Unformated = Logger('calibLogger.U', 'calibrationLog', 'Logs', 'unformated')
+class _CalibLogger: 
+    TNLM = _Logger('calibLogger.TNLM', 'calibrationLog', 'Logs', 'time-name-level-message')
+    Unformated = _Logger('calibLogger.U', 'calibrationLog', 'Logs', 'unformated')
     
     @staticmethod
     def Log(logFlag, logLevel, *args):
-        CalibLogger.TNLM.Log(logFlag, logLevel, *args)
+        _CalibLogger.TNLM.Log(logFlag, logLevel, *args)
                 
     @staticmethod
     def Custom(logFlag, logLevel, *args):
-        CalibLogger.Unformated.Log(logFlag, logLevel, *args)
+        _CalibLogger.Unformated.Log(logFlag, logLevel, *args)
         
     @staticmethod
     def KillLogger():
-        CalibLogger.TNLM.CloseLogger()
-        CalibLogger.Unformated.CloseLogger()
+        _CalibLogger.TNLM.CloseLogger()
+        _CalibLogger.Unformated.CloseLogger()
 
     @staticmethod
     def KillLogger_n_DeleteLogFiles():
-        CalibLogger.TNLM.CloseLogger()
-        CalibLogger.Unformated.CloseLogger()
+        _CalibLogger.TNLM.CloseLogger()
+        _CalibLogger.Unformated.CloseLogger()
         
-        CalibLogger.TNLM.DeleteLogFile()
-        CalibLogger.Unformated.DeleteLogFile()
+        _CalibLogger.TNLM.DeleteLogFile()
+        _CalibLogger.Unformated.DeleteLogFile()
 
 
 # ===== Camera Calibration Class ====================================================
@@ -89,7 +89,7 @@ class CameraCalibration:
     """
         
     def __init__(self, calibParamsFileName=None):                    
-        self._logger = CalibLogger
+        self._logger = _CalibLogger
         self._keepLogFile = True 
         self._logger.Custom(
             self._keepLogFile, 
@@ -103,7 +103,7 @@ class CameraCalibration:
         self._calibParamsFileName = calibParamsFileName
 
         # termination criteria when finding corners with subpixel accuracy
-        self._criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+        self._criteria = (_cv.TERM_CRITERIA_EPS + _cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
         self._objpoints = None # 3d point in real world space
         self._imgpoints = None # 2d points in image plane.
 
@@ -150,7 +150,7 @@ class CameraCalibration:
             
         self._imagesPath = imagesPath
         self._imageNames = []
-        dirLst = os.listdir(imagesPath)
+        dirLst = _os.listdir(imagesPath)
 
         for item in dirLst:
             for flt in typeFilter:
@@ -193,38 +193,38 @@ class CameraCalibration:
             self._imgpoints = [] # 2d points in image plane.
 
             # prepare object points, like (0,0,0), (20,0,0), (40,0,0) ....,(120,100,0)
-            objp = np.zeros((chessboardSize[0]*chessboardSize[1],3), np.float32)
-            objp[:,:2] = np.mgrid[0:chessboardSize[0],0:chessboardSize[1]].T.reshape(-1,2) * squareSize
+            objp = _np.zeros((chessboardSize[0]*chessboardSize[1],3), _np.float32)
+            objp[:,:2] = _np.mgrid[0:chessboardSize[0],0:chessboardSize[1]].T.reshape(-1,2) * squareSize
 
             for imgName in self._imageNames:
 
                 fullPath = self._imagesPath + imgName
-                img_c = cv2.imread(fullPath)
-                img_g = cv2.cvtColor(img_c, cv2.COLOR_BGR2GRAY)                                
+                img_c = _cv.imread(fullPath)
+                img_g = _cv.cvtColor(img_c, _cv.COLOR_BGR2GRAY)                                
 
-                ret, corners = cv2.findChessboardCorners(img_g, chessboardSize, None)
+                ret, corners = _cv.findChessboardCorners(img_g, chessboardSize, None)
 
                 # If found, add object points, image points (after refining them)
                 if ret == True:                                        
                     self._objpoints.append(objp)
 
-                    corners2 = cv2.cornerSubPix(img_g, corners, (11,11), (-1,-1), self._criteria)
+                    corners2 = _cv.cornerSubPix(img_g, corners, (11,11), (-1,-1), self._criteria)
                     self._imgpoints.append(corners2)
                     
                     self._logger.Log(self._keepLogFile, 'info', "The chessboard has been successfully detected in image %s.", imgName)
 
                     # Draw and display the corners
                     if showImagesFlag:
-                        img = cv2.drawChessboardCorners(img_c, chessboardSize, corners2,ret)
-                        cv2.imshow('img',img)
-                        cv2.waitKey(350) 
+                        img = _cv.drawChessboardCorners(img_c, chessboardSize, corners2,ret)
+                        _cv.imshow('img',img)
+                        _cv.waitKey(350) 
                 else:
                     self._logger.Log(self._keepLogFile, 'warning', "The chessboard has NOT been successfully detected in image %s.", imgName)
 
             self._imgShape = img_g.shape
             
             if showImagesFlag:
-                cv2.destroyAllWindows()
+                _cv.destroyAllWindows()
                 
             self._logger.Log(self._keepLogFile, 'info', "The chessboards finding process has been completed.")
             return True
@@ -254,7 +254,7 @@ class CameraCalibration:
             # dist: distortion coefficients
             # rvecs: rotation matrix
             # tvecs: translation matrix
-            ret, self._mtx, self._dist, rvecs, tvecs = cv2.calibrateCamera(
+            ret, self._mtx, self._dist, rvecs, tvecs = _cv.calibrateCamera(
                 self._objpoints, 
                 self._imgpoints, 
                 self._imgShape[::-1], 
@@ -298,7 +298,7 @@ class CameraCalibration:
             #     * getOptimalNewCameraMatrix or
             #     * initUndistortRectifyMap & remap
             # to eliminate unwanted (black) pixels
-            udst = cv2.undistort(img, self._mtx, self._dist, None, self._mtx)
+            udst = _cv.undistort(img, self._mtx, self._dist, None, self._mtx)
 
             return udst
         elif self._mtx is None:
@@ -349,7 +349,7 @@ class CameraCalibration:
         self._logger.Custom(self._keepLogFile, 'info', "\n===== SaveParameters =====")
         
         rootFolder = 'calibParams'
-        MkDir(rootFolder)
+        _MkDir(rootFolder)
         
         # NOTE: the filename has higher priority than the name that has been determined
         # in the class initialization!
@@ -357,37 +357,37 @@ class CameraCalibration:
         if self._mtx is not None:
             if fileName is not None:                
                 if save2MatFileFlag:
-                    sio.savemat(rootFolder + '/' + fileName + '.mat', {'calibrationParameters': [self._mtx, self._dist]})
+                    _sio.savemat(rootFolder + '/' + fileName + '.mat', {'calibrationParameters': [self._mtx, self._dist]})
                     _type = 'mat'
                 else:
                     _type = 'pkl'
                     with open(rootFolder + '/' + fileName + '.pkl', 'wb') as f:
-                        pickle.dump([self._mtx, self._dist], f)
+                        _pickle.dump([self._mtx, self._dist], f)
                 
                 self._logger.Log(self._keepLogFile, 'info', "Calibration parameters have been successfully saved with name: {0}.{1}.".format(fileName, _type))
                 return True
             
             elif self._calibParamsFileName is not None:                
                 if save2MatFileFlag:
-                    sio.savemat(rootFolder + '/' + self._calibParamsFileName + '.mat', {'calibrationParameters': [self._mtx, self._dist]})
+                    _sio.savemat(rootFolder + '/' + self._calibParamsFileName + '.mat', {'calibrationParameters': [self._mtx, self._dist]})
                     _type = 'mat'
                 else:
                     _type = 'pkl'
                     with open(rootFolder + '/' + self._calibParamsFileName + '.pkl', 'wb') as f:
-                        pickle.dump([self._mtx, self._dist], f)
+                        _pickle.dump([self._mtx, self._dist], f)
                         
                 self._logger.Log(self._keepLogFile, 'info', "Calibration parameters have been successfully saved with name: {0}.{1}.".format(self._calibParamsFileName, _type))
                 return True
             
             else:                
-                fnm = datetime.datetime.today().strftime("%Y-%m-%d_%H.%M.%S") + '_calibration'
+                fnm = _datetime.datetime.today().strftime("%Y-%m-%d_%H.%M.%S") + '_calibration'
                 if save2MatFileFlag:
-                    sio.savemat(rootFolder + '/' + fnm + '.mat', {'calibrationParameters': [self._mtx, self._dist]})
+                    _sio.savemat(rootFolder + '/' + fnm + '.mat', {'calibrationParameters': [self._mtx, self._dist]})
                     _type = 'mat'
                 else:
                     _type = 'pkl'
                     with open(rootFolder + '/' + fnm + '.pkl', 'wb') as f:
-                        pickle.dump([self._mtx, self._dist], f)
+                        _pickle.dump([self._mtx, self._dist], f)
                                     
                 self._logger.Log(self._keepLogFile, 'info', "Calibration parameters have been saved successfully with name: {0}.{1}.".format(fnm, _type))
                 return True
@@ -437,9 +437,9 @@ class CameraCalibration:
             fname = fileName
             if fileName[-3:] == 'pkl':                
                 with open(rootFolder + '/' + fileName, 'rb') as f:
-                    mtx, dist = pickle.load(f)
+                    mtx, dist = _pickle.load(f)
             elif fileName[-3:] == 'mat':
-                mtx, dist = sio.loadmat(rootFolder + '/' + fileName)['calibrationParameters'][0]
+                mtx, dist = _sio.loadmat(rootFolder + '/' + fileName)['calibrationParameters'][0]
             else:
                 self._logger.Log(self._keepLogFile, 'warning', "The file's type is not known. The file must have one of the following types: <fileName>.pkl or <fileName>.mat.")
 
@@ -447,11 +447,11 @@ class CameraCalibration:
             try:
                 fname = self._calibParamsFileName + '.pkl'
                 with open(rootFolder + '/' + self._calibParamsFileName + '.pkl', 'rb') as f:
-                    mtx, dist = pickle.load(f)
+                    mtx, dist = _pickle.load(f)
             except:
                 try:
                     fname = self._calibParamsFileName + '.mat'
-                    mtx, dist = sio.loadmat(rootFolder + '/' + self._calibParamsFileName + '.mat')['calibrationParameters'][0]
+                    mtx, dist = _sio.loadmat(rootFolder + '/' + self._calibParamsFileName + '.mat')['calibrationParameters'][0]
                 except:
                     self._logger.Log(self._keepLogFile, 'warning', "The file's type is not known. The file must have one of the following types: <fileName>.pkl or <fileName>.mat.")
         else:
@@ -472,7 +472,7 @@ class CameraCalibration:
             The 3x3 camera matrix with which we want to update the current one.
             The shape of the ndarray must be (3,3).
         """
-        self._mtx = np.array(cameraMat)
+        self._mtx = _np.array(cameraMat)
 
     
     def SetDistortionCoefficients(self, distCoeffs):
@@ -484,4 +484,4 @@ class CameraCalibration:
             The 1x5 vector with which we want to update the current one.
             The shape of the ndarray must be (1,5).
         """
-        self._dist = np.array(distCoeffs)
+        self._dist = _np.array(distCoeffs)
